@@ -1,0 +1,33 @@
+client1						server						client2
+connects		-->			add to			<--			connects
+							usertable
+
+wants to
+chat to
+client2
+
+requet VoIP		-->			check if
+							client2 available
+							if not:
+				<--				error
+							else:
+								user		 -->		user wants to chat
+											 <--        accept\decline
+							if accept:
+				<--				user
+							else:
+				<--				error
+				
+--------------------------server is then eliminated-----------------------------------
+
+	client1													client2
+	connect using				voice UDP            receive and playback using
+	recieved user obj		------------------>      java sound
+	
+	receive and playback		voice UDP
+	using java sound		<------------------      sends voice response
+	*								*						*
+	*								*						*
+	*								*						*
+	
+	if either or both stop responding the call is ended
