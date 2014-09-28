@@ -1,6 +1,8 @@
 import java.io.*;
 import java.net.*;
 
+import javax.swing.JOptionPane;
+
 /**
  * 
  * @author A Visser, 17224047
@@ -10,6 +12,7 @@ import java.net.*;
 public class ClientThread extends Thread
 {
 	private static Socket socket = null;
+	private static DatagramSocket callSocket = null;
 	private static byte[] sendbuf = null;
 	private static byte[] recbuf = null;
 	public static User user = new User();
@@ -65,13 +68,45 @@ public class ClientThread extends Thread
 				{
 					if (rec.getMessage().equals("%BYE%"))
 					{
-						System.out.println("in break");
 						rec = new Message();
 						break;
 					}
+					else if (rec.getMessage().equals("%NOPE NOPE NOPE%"))
+					{
+						JOptionPane.showMessageDialog(null, "Imaginary people don't count...");
+					}
+					else if (rec.getMessage().equals("%CALL ME MAYBE%"))
+					{
+						Message confirmation = new Message();
+						String prompt = "Accept call from " + rec.getOrigin() + "?";
+						int reply = JOptionPane.showConfirmDialog(null, prompt, "Call confirmation", JOptionPane.YES_NO_OPTION);
+				        if (reply == JOptionPane.YES_OPTION)
+				        {
+				        	//send true
+				        	confirmation = new Message(rec.getRecipient(), rec.getRecipient(), "%SURE SURE%");
+				        	Send(confirmation);
+				        	callSocket = new DatagramSocket();
+				        	//call a method to start calls?
+				        }
+				        else 
+				        {
+				        	//send false
+				        	confirmation = new Message(rec.getRecipient(), rec.getRecipient(), "%IMPOSSIBRU%");
+				        	Send(confirmation);
+				        }
+					}
+					else if (rec.getMessage().equals("%SURE SURE%"))
+					{
+						JOptionPane.showMessageDialog(null, "Accepted");
+						//call a method to start calls?
+					}
+					else if (rec.getMessage().equals("%IMPOSSIBRU%"))
+					{
+						JOptionPane.showMessageDialog(null, "Declined");
+						callSocket.close();
+					}
 					else if (rec.getRecipient() != "" || rec.getOrigin().equalsIgnoreCase("server"))
 					{	
-						System.out.println("in if");
 						Client.chatArea.append("[" + rec.getOrigin() +"]: " + rec.getMessage() + "\n");
 
 					}
@@ -91,6 +126,7 @@ public class ClientThread extends Thread
 		catch (IOException e)
 		{
 			System.err.println("IO Exception");
+			System.exit(0);
 		} 
 		catch (ClassNotFoundException e) 
 		{
@@ -107,6 +143,19 @@ public class ClientThread extends Thread
 				message.getMessage().equalsIgnoreCase("%BYE%"))
 			{
 				socket.getOutputStream().write(Message.BYE);
+			}
+			else if (message.getMessage().equalsIgnoreCase("%CALL ME MAYBE%"))
+			{
+				socket.getOutputStream().write(Message.CALL);
+				callSocket = new DatagramSocket();
+			}
+			else if (message.getMessage().equalsIgnoreCase("%SURE SURE%"))
+			{
+				socket.getOutputStream().write(Message.ACCEPT);
+			}
+			else if (message.getMessage().equalsIgnoreCase("%IMPOSSIBRU%"))
+			{
+				socket.getOutputStream().write(Message.IGNORE);
 			}
 			else if (message.getRecipient().equalsIgnoreCase(""))
 			{

@@ -22,7 +22,7 @@ public class Client
 	private static JButton connectButton = new JButton();
 	private static JButton disconnectButton = new JButton();
 	private static JButton sendButton = new JButton();
-	private static JButton whisperButton = new JButton();
+	private static JButton callButton = new JButton();
 	private static JLabel messageLabel = new JLabel("Message: ");
 	private static JLabel chatLabel = new JLabel();
 	private static JLabel onlineLabel = new JLabel();
@@ -40,6 +40,12 @@ public class Client
 	private static JLabel enterUserNameLabel = new JLabel();
 	private static JLabel enterPortLabel = new JLabel();
 	private static JLabel enterHostLabel = new JLabel();
+	
+	//call window
+	private static JFrame callWindow = new JFrame();
+	private static JTextField callUserField = new JTextField(15);
+	private static JButton makeCallButton = new JButton();
+	private static JLabel callUserLabel = new JLabel();
 	
 	public static void main(String[] args)
 	{
@@ -78,7 +84,6 @@ public class Client
 		sendButton.setText("Send");
 		mainWindow.getContentPane().add(sendButton);
 		sendButton.setBounds(130, 40, 115, 25);
-		//send button listner
 		sendButton.addActionListener(
 				new java.awt.event.ActionListener()
 				{
@@ -101,9 +106,18 @@ public class Client
 					}
 				});
 		
-		whisperButton.setText("Whisper");
-		mainWindow.getContentPane().add(whisperButton);
-		whisperButton.setBounds(10, 40, 115, 25);
+		callButton.setText("Call");
+		mainWindow.getContentPane().add(callButton);
+		callButton.setBounds(10, 40, 115, 25);
+		callButton.addActionListener(
+				new java.awt.event.ActionListener()
+				{
+					public void actionPerformed(java.awt.event.ActionEvent event)
+					{
+						CallButton();
+					}
+				});
+		
 		
 		messageLabel.setText("Message:");
 		mainWindow.getContentPane().add(messageLabel);
@@ -184,7 +198,6 @@ public class Client
 		enterButton.setText("Login");
 		loginWindow.getContentPane().add(enterButton);
 		enterButton.setBounds(105, 95, 80, 20);
-		//enter button listner
 		enterButton.addActionListener(
 				new java.awt.event.ActionListener()
 				{
@@ -229,7 +242,7 @@ public class Client
 				String toUser = temp.substring(1, firstSpace);
 				String message = temp.substring(firstSpace +1);
 				
-				Message whisper = new Message(_userName, toUser, message);
+				Message whisper = new Message(_userName, toUser, message.trim());
 				ClientThread.Send(whisper);
 				messageField.setText("");
 				messageField.requestFocus();
@@ -248,5 +261,51 @@ public class Client
 	{
 		Message bye = new Message(_userName, "", "%BYE%");
 		ClientThread.Send(bye);
+	}
+	
+	public static void CallButton()
+	{		
+		callWindow = new JFrame();
+		callWindow.setTitle("Cr@p Call Config");
+		callWindow.setLayout(null);
+		callWindow.setSize(320, 100);
+		
+		callUserLabel.setText("Username:");
+		callWindow.getContentPane().add(callUserLabel);
+		callUserLabel.setBounds(5, 5, 100, 20);
+		
+		callUserField.setText("");
+		callWindow.getContentPane().add(callUserField);
+		callUserField.setBounds(105, 5, 200, 20);
+		
+		makeCallButton.setText("Call");
+		callWindow.getContentPane().add(makeCallButton);
+		makeCallButton.setBounds(105, 30, 80, 20);
+		makeCallButton.addActionListener(
+				new java.awt.event.ActionListener()
+				{
+					public void actionPerformed(java.awt.event.ActionEvent event)
+					{
+						RequestCall();
+					}
+				});
+		
+		callWindow.setVisible(true);
+		
+	}
+	
+	public static void RequestCall()
+	{
+		if (!callUserField.getText().equals(""))
+		{
+			Message call = new Message(_userName, callUserField.getText().trim(), "%CALL ME MAYBE%");
+			ClientThread.Send(call);
+			System.out.println("call request sent");
+			callUserField.setText("");
+		}
+		else
+		{
+			JOptionPane.showMessageDialog(null, "Enter user to call.");
+		}
 	}
 }

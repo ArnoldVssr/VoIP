@@ -12,6 +12,9 @@ public class Message implements Serializable
 	public static final int WHISPER = 1;
     public static final int LOBBY = 2;
     public static final int HASHSET = 3;
+    public static final int CALL = 4;
+    public static final int IGNORE = 5;
+    public static final int ACCEPT = 6;
     public static final int BYE = 9;
 	
 	public Message()
