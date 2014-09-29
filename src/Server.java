@@ -18,7 +18,10 @@ public class Server
     public static HashSet<User> users = new HashSet<User>();
     public static Map<String,Socket> Maptest = new HashMap<String,Socket>();
     public static ArrayList<String> usernames = new  ArrayList<String>();
+	public static int prevLen = 0;
+	public static int curLen = 0;
 	
+    
 	public static JFrame _serverFrame = new JFrame();
 	public static JTextArea _serverLog = new JTextArea();
 	public static JScrollPane _serverScroll = new JScrollPane();
