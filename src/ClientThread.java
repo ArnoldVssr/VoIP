@@ -39,6 +39,7 @@ public class ClientThread extends Thread
 	{
 		InetAddress address;
 		int port = -1;
+		int state = 0;
 		
 		try 
 		{
@@ -50,7 +51,8 @@ public class ClientThread extends Thread
 			address = socket.getInetAddress();
 			port = socket.getPort();
 			user = new User(username, address, port);
-						
+			
+			//send user data to server
 			sendbuf = toByteArray(user);
 			socket.getOutputStream().write(Message.USER);
 			socket.getOutputStream().write(sendbuf);
@@ -61,29 +63,60 @@ public class ClientThread extends Thread
 				Message rec = new Message();
 				try
 				{
-					socket.getInputStream().read(recbuf);
-					rec = (Message) toObject(recbuf);
+					state = socket.getInputStream().read();
 				}
 				finally
 				{
-					if (rec.getMessage().equals("%BYE%"))
+					if (state == Message.HASHSET)
 					{
-						rec = new Message();
-						break;
+						socket.getInputStream().read(recbuf);
+						Object[] online = (Object[]) toObject(recbuf);
+						String[] onlineList = new String[online.length];
+						for (int i = 0; i < online.length; i++)
+						{
+							onlineList[i] = (String) online[i];
+						}
+						Client.onlineUsers.setListData(onlineList);
 					}
-					else if (rec.getMessage().equals("%NOPE NOPE NOPE%"))
+					else if (state == Message.LOBBY)
 					{
-						JOptionPane.showMessageDialog(null, "Imaginary people don't count...");
+						socket.getInputStream().read(recbuf);
+						rec = (Message) toObject(recbuf);
+						
+						Client.chatArea.append("[" + rec.getOrigin() +"]: " + rec.getMessage() + "\n");
 					}
-					else if (rec.getMessage().equals("%CALL ME MAYBE%"))
+					else if (state == Message.WHISPER)
 					{
+						socket.getInputStream().read(recbuf);
+						rec = (Message) toObject(recbuf);
+						
+						Client.chatArea.append("[(whisp)" + rec.getOrigin() +"]: " + rec.getMessage() + "\n");
+					}
+					else if (state == Message.DC)
+					{
+						socket.getInputStream().read(recbuf);
+						rec = (Message) toObject(recbuf);
+						
+						Client.chatArea.append(rec.getMessage());
+					}
+					else if (state == Message.NONEXISTANT)
+					{
+						socket.getInputStream().read(recbuf);
+						rec = (Message) toObject(recbuf);
+						JOptionPane.showMessageDialog(null, "Imaginary people like \"" + rec.getRecipient() + "\" don't count...");
+					}
+					else if (state == Message.REQUEST)
+					{
+						socket.getInputStream().read(recbuf);
+						rec = (Message) toObject(recbuf);
+						
 						Message confirmation = new Message();
 						String prompt = "Accept call from " + rec.getOrigin() + "?";
 						int reply = JOptionPane.showConfirmDialog(null, prompt, "Call confirmation", JOptionPane.YES_NO_OPTION);
 				        if (reply == JOptionPane.YES_OPTION)
 				        {
 				        	//send true
-				        	confirmation = new Message(rec.getRecipient(), rec.getRecipient(), "%SURE SURE%");
+				        	confirmation = new Message(rec.getOrigin(), rec.getRecipient(), "%SURE SURE%");
 				        	Send(confirmation);
 				        	callSocket = new DatagramSocket();
 				        	//call a method to start calls?
@@ -91,46 +124,45 @@ public class ClientThread extends Thread
 				        else 
 				        {
 				        	//send false
-				        	confirmation = new Message(rec.getRecipient(), rec.getRecipient(), "%IMPOSSIBRU%");
+				        	confirmation = new Message(rec.getOrigin(), rec.getRecipient(), "%IMPOSSIBRU%");
 				        	Send(confirmation);
 				        }
 					}
-					else if (rec.getMessage().equals("%SURE SURE%"))
+					else if (state == Message.ACCEPT)
 					{
-						JOptionPane.showMessageDialog(null, "Accepted");
+						socket.getInputStream().read(recbuf);
+						rec = (Message) toObject(recbuf);
+						JOptionPane.showMessageDialog(null, rec.getRecipient() +" Accepted");
 						//call a method to start calls?
 					}
-					else if (rec.getMessage().equals("%IMPOSSIBRU%"))
+					else if (state == Message.DECLINE)
 					{
-						JOptionPane.showMessageDialog(null, "Declined");
+						socket.getInputStream().read(recbuf);
+						rec = (Message) toObject(recbuf);
+						JOptionPane.showMessageDialog(null, rec.getRecipient() +" Declined");
 						callSocket.close();
+						
 					}
-					else if (rec.getRecipient() != "" || rec.getOrigin().equalsIgnoreCase("server"))
-					{	
-						Client.chatArea.append("[" + rec.getOrigin() +"]: " + rec.getMessage() + "\n");
-
+					else if (state == Message.REMOVED)
+					{
+						socket.getInputStream().read(recbuf);
+						rec = (Message) toObject(recbuf);
+						System.exit(0);
 					}
 				}
-				//for if server suddenly crashes.
-				//dis wat die infinite prints veroorsaak, die ou msg is nog in recvbuf.........
-				recbuf = new byte[socket.getReceiveBufferSize()];
 			}
-			System.out.println("out of while");
-        	socket.close();
-        	System.exit(0);
 		}
-		catch (SocketException socketError) 
+		catch (SocketException e) 
 		{
-			System.err.println(socketError.getMessage());
+			e.printStackTrace();
 		} 
 		catch (IOException e)
 		{
-			System.err.println("IO Exception");
-			System.exit(0);
+			e.printStackTrace();
 		} 
 		catch (ClassNotFoundException e) 
 		{
-			System.err.println(e.getMessage());
+			e.printStackTrace();
 		} 
 	}
 	
@@ -139,28 +171,35 @@ public class ClientThread extends Thread
 		try
 		{
 			sendbuf = toByteArray(message);
+
+			//dc message
 			if (message.getRecipient().equalsIgnoreCase("") &&
 				message.getMessage().equalsIgnoreCase("%BYE%"))
 			{
 				socket.getOutputStream().write(Message.BYE);
 			}
+			//call message
 			else if (message.getMessage().equalsIgnoreCase("%CALL ME MAYBE%"))
 			{
 				socket.getOutputStream().write(Message.CALL);
 				callSocket = new DatagramSocket();
 			}
+			//accepted call message
 			else if (message.getMessage().equalsIgnoreCase("%SURE SURE%"))
 			{
 				socket.getOutputStream().write(Message.ACCEPT);
 			}
+			//rejected call message
 			else if (message.getMessage().equalsIgnoreCase("%IMPOSSIBRU%"))
 			{
-				socket.getOutputStream().write(Message.IGNORE);
+				socket.getOutputStream().write(Message.DECLINE);
 			}
+			//lobby message
 			else if (message.getRecipient().equalsIgnoreCase(""))
 			{
 				socket.getOutputStream().write(Message.LOBBY);
 			}
+			//whisper message
 			else
 			{
 				socket.getOutputStream().write(Message.WHISPER);
@@ -170,7 +209,7 @@ public class ClientThread extends Thread
 		}
 		catch (Exception e)
 		{
-			System.out.println("error in send MyClient");
+			e.printStackTrace();
 		}
 	}
 	

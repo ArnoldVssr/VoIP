@@ -53,13 +53,21 @@ public class ServerThread extends Thread
         			socket.getInputStream().read(recbuf);
         			Message Temp = (Message) toObject(recbuf);
         			Socket rec = Server.Maptest.get(Temp.getRecipient());
+        			sendbuf = toByteArray(Temp);
         			if (rec != null)
-        			{
-        				sendbuf = toByteArray(Temp);
+        			{        				
+        				rec.getOutputStream().write(Message.WHISPER);
+        				rec.getOutputStream().flush();
+        				
         				rec.getOutputStream().write(sendbuf);
         				rec.getOutputStream().flush();
         			}
+        			
         			rec = Server.Maptest.get(Temp.getOrigin());
+        			
+        			rec.getOutputStream().write(Message.WHISPER);
+    				rec.getOutputStream().flush();
+        			
         			rec.getOutputStream().write(sendbuf);
     				rec.getOutputStream().flush();
         		}
@@ -67,10 +75,13 @@ public class ServerThread extends Thread
         		{
         			socket.getInputStream().read(recbuf);
         			Message Temp = (Message) toObject(recbuf);
-        			System.out.println("CH recv: " + Temp.getMessage());
     				for(Map.Entry<String, Socket> entry: Server.Maptest.entrySet())
     				{
     					sendbuf = toByteArray(Temp);
+    					//lobby id
+    					entry.getValue().getOutputStream().write(Message.LOBBY);
+    					entry.getValue().getOutputStream().flush();
+    					//message
     					entry.getValue().getOutputStream().write(sendbuf);
     					entry.getValue().getOutputStream().flush();
     				}
@@ -90,15 +101,18 @@ public class ServerThread extends Thread
         		}
         		else if (state == Message.CALL)
         		{
-        			System.out.println("shit what to do now");
         			socket.getInputStream().read(recbuf);
         			Message temp = (Message) toObject(recbuf);
         			Socket rec = null;
         			if (!Server.usernames.contains(temp.getRecipient()))
         			{
-        				Message noUser = new Message("server", temp.getOrigin(), "%NOPE NOPE NOPE%");
+        				Message noUser = new Message("", temp.getRecipient(), "");
         				sendbuf = toByteArray(noUser);
         				rec = Server.Maptest.get(temp.getOrigin());
+        				
+        				rec.getOutputStream().write(Message.NONEXISTANT);
+        				rec.getOutputStream().flush();
+        				
             			rec.getOutputStream().write(sendbuf);
         				rec.getOutputStream().flush();
         				
@@ -107,27 +121,37 @@ public class ServerThread extends Thread
         			{
         				sendbuf = toByteArray(temp);
         				rec = Server.Maptest.get(temp.getRecipient());
+        				
+        				rec.getOutputStream().write(Message.REQUEST);
+        				rec.getOutputStream().flush();
+        				
         				rec.getOutputStream().write(sendbuf);
         				rec.getOutputStream().flush();
         			}
         		}
-        		else if (state == Message.IGNORE)
+        		else if (state == Message.DECLINE)
         		{
-        			System.out.println("declined");
         			socket.getInputStream().read(recbuf);
         			Message temp = (Message) toObject(recbuf);
         			Socket rec = Server.Maptest.get(temp.getRecipient());
         			sendbuf = toByteArray(temp);
+        			
+        			rec.getOutputStream().write(Message.DECLINE);
+    				rec.getOutputStream().flush();
+        			
         			rec.getOutputStream().write(sendbuf);
     				rec.getOutputStream().flush();
         		}
         		else if (state == Message.ACCEPT)
         		{
-        			System.out.println("accepted");
         			socket.getInputStream().read(recbuf);
         			Message temp = (Message) toObject(recbuf);
         			Socket rec = Server.Maptest.get(temp.getRecipient());
         			sendbuf = toByteArray(temp);
+        			
+        			rec.getOutputStream().write(Message.ACCEPT);
+    				rec.getOutputStream().flush();
+        			
         			rec.getOutputStream().write(sendbuf);
     				rec.getOutputStream().flush();
         		}
@@ -136,21 +160,32 @@ public class ServerThread extends Thread
         			socket.getInputStream().read(recbuf);
         			Message Temp = (Message) toObject(recbuf);
         			
-        			Message send = new Message("server", "", Temp.getOrigin() + " disconnected...");
+        			Message send = new Message("server", "", Temp.getOrigin() + " disconnected...\n");
         			for(Map.Entry<String, Socket> entry: Server.Maptest.entrySet())
     				{
-    					sendbuf = toByteArray(send);
-    					entry.getValue().getOutputStream().write(sendbuf);
-    					entry.getValue().getOutputStream().flush();
+        				
+        				if (!entry.getKey().equals(Temp.getOrigin()))
+        				{
+        					sendbuf = toByteArray(send);
+	    					
+	    					entry.getValue().getOutputStream().write(Message.DC);
+	    					entry.getValue().getOutputStream().flush();
+	    					
+	    					entry.getValue().getOutputStream().write(sendbuf);
+	    					entry.getValue().getOutputStream().flush();
+        				}
     				}
         			
         			sendbuf = toByteArray(Temp);
         			Socket rec = Server.Maptest.get(Temp.getOrigin());
+        			
+        			rec.getOutputStream().write(Message.REMOVED);
+    				rec.getOutputStream().flush();   
+        			
         			rec.getOutputStream().write(sendbuf);
     				rec.getOutputStream().flush();      			
         			
         			User dc = new User(Temp.getOrigin(), null, 0);
-            		//Server.Maptest.remove(Temp.getOrigin());
         			Server.prevLen = Server.usernames.size();
             		Server.Maptest.remove(Temp.getOrigin());
             		Server.users.remove(dc);
@@ -160,7 +195,6 @@ public class ServerThread extends Thread
             		break;
         		}
         	}
-        	socket.close();
         }
         catch (IOException e)
         {
@@ -173,11 +207,30 @@ public class ServerThread extends Thread
 	}
 	
 	public static void PrintUsers()
-	{
+	{		
 		if (Server.curLen == 0)
 		{
 			Server._serverLog.append("Users: \n");
 			Server._serverLog.append(" none\n");
+			
+			try
+			{
+				for(Map.Entry<String, Socket> entry: Server.Maptest.entrySet())
+				{
+					Object[] onlineUsers = Server.usernames.toArray();
+					sendbuf = toByteArray(onlineUsers);
+	
+					entry.getValue().getOutputStream().write(Message.HASHSET);
+					entry.getValue().getOutputStream().flush();
+	
+					entry.getValue().getOutputStream().write(sendbuf);
+					entry.getValue().getOutputStream().flush();
+				}
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
 		}
 		else if (Server.prevLen != Server.curLen)
 		{
@@ -185,6 +238,25 @@ public class ServerThread extends Thread
 			for (int i = 0; i < Server.usernames.size(); i++)
 			{
 				Server._serverLog.append(" " + Server.usernames.get(i) + "\n"); 
+			}
+			
+			try
+			{
+				for(Map.Entry<String, Socket> entry: Server.Maptest.entrySet())
+				{
+					Object[] onlineUsers = Server.usernames.toArray();
+					sendbuf = toByteArray(onlineUsers);
+	
+					entry.getValue().getOutputStream().write(Message.HASHSET);
+					entry.getValue().getOutputStream().flush();
+	
+					entry.getValue().getOutputStream().write(sendbuf);
+					entry.getValue().getOutputStream().flush();
+				}
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
 			}
 		}
 		
