@@ -145,6 +145,9 @@ public class ServerThread extends Thread
         		else if (state == Message.ACCEPT)
         		{
         			socket.getInputStream().read(recbuf);
+        			String tempM = (String) toObject(recbuf);
+        			
+        			socket.getInputStream().read(recbuf);
         			Message temp = (Message) toObject(recbuf);
         			Socket rec = Server.Maptest.get(temp.getOrigin());
         			sendbuf = toByteArray(temp);
@@ -152,6 +155,9 @@ public class ServerThread extends Thread
         			rec.getOutputStream().write(Message.ACCEPT);
     				rec.getOutputStream().flush();
         			
+    				rec.getOutputStream().write(toByteArray(tempM));
+    				rec.getOutputStream().flush();
+    				
         			rec.getOutputStream().write(sendbuf);
     				rec.getOutputStream().flush();
         		}

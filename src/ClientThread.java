@@ -58,6 +58,9 @@ public class ClientThread extends Thread
 			socket.getOutputStream().write(sendbuf);
 			socket.getOutputStream().flush();
 			
+			System.out.println("InetAddr: " + socket.getInetAddress()
+					+ "\nPort: " + socket.getLocalPort());
+			
 			while(true)
 			{
 				Message rec = new Message();
@@ -118,8 +121,13 @@ public class ClientThread extends Thread
 				        	//send true
 				        	confirmation = new Message(rec.getOrigin(), rec.getRecipient(), "%SURE SURE%");
 				        	Send(confirmation);
-				        	callSocket = new DatagramSocket();
-				        	//call a method to start calls?
+				        	callSocket = new DatagramSocket();	
+				        	
+				        	/*******************************************************************************************/
+				        	//call a method to start calls?-------------------------------------------------------------
+				        	
+							
+							/*******************************************************************************************/
 				        }
 				        else 
 				        {
@@ -131,9 +139,23 @@ public class ClientThread extends Thread
 					else if (state == Message.ACCEPT)
 					{
 						socket.getInputStream().read(recbuf);
+						String temp = (String)toObject(recbuf);
+						String[] tempArr = temp.split(":");
+						System.out.println("Inet: " + tempArr[0] + "\nPort: " + tempArr[1]);
+						
+						socket.getInputStream().read(recbuf);
 						rec = (Message) toObject(recbuf);
 						JOptionPane.showMessageDialog(null, rec.getRecipient() +" Accepted");
-						//call a method to start calls?
+						
+						/***********************************************************************************************/
+						//call a method to start calls?------------------------------------------------------------------
+						
+						
+						
+			        	//Socket recvSocket = new Socket();
+			        	//recvSocket = (Socket) toObject(recbuf);
+			        	//System.out.println(((Socket) toObject(recbuf)).getRemoteSocketAddress());
+						
 					}
 					else if (state == Message.DECLINE)
 					{
@@ -194,6 +216,9 @@ public class ClientThread extends Thread
 			else if (message.getMessage().equalsIgnoreCase("%SURE SURE%"))
 			{
 				socket.getOutputStream().write(Message.ACCEPT);
+				
+				socket.getOutputStream().write(toByteArray(socket.getRemoteSocketAddress()));
+				socket.getOutputStream().flush();
 			}
 			//rejected call message
 			else if (message.getMessage().equalsIgnoreCase("%IMPOSSIBRU%"))
