@@ -115,11 +115,20 @@ public class ClientThread extends Thread
 						int reply = JOptionPane.showConfirmDialog(null, prompt, "Call confirmation", JOptionPane.YES_NO_OPTION);
 				        if (reply == JOptionPane.YES_OPTION)
 				        {
+				        	//fok alles send dadelik
 				        	//send true
-				        	confirmation = new Message(rec.getOrigin(), rec.getRecipient(), "%SURE SURE%");
-				        	Send(confirmation);
-				        	callSocket = new DatagramSocket();
+				        	//confirmation = new Message(rec.getOrigin(), rec.getRecipient(), "%SURE SURE%");
+				        	
+				        	String addressName = socket.getRemoteSocketAddress().toString() + ":" + rec.getOrigin();
+				        	System.out.println(addressName);
+				        	sendbuf = toByteArray(addressName);
+				        	socket.getOutputStream().write(Message.ACCEPT);
+				        	socket.getOutputStream().flush();
+				        	socket.getOutputStream().write(sendbuf);
+				        	socket.getOutputStream().flush();
+				        	
 				        	//call a method to start calls?
+				        	UDPreceiver();
 				        }
 				        else 
 				        {
@@ -131,9 +140,13 @@ public class ClientThread extends Thread
 					else if (state == Message.ACCEPT)
 					{
 						socket.getInputStream().read(recbuf);
-						rec = (Message) toObject(recbuf);
+						String temp = (String) toObject(recbuf);
+						System.out.println(temp);
+						String[] inetaddress = temp.split(":");
+						System.out.println(inetaddress[0]);
 						JOptionPane.showMessageDialog(null, rec.getRecipient() +" Accepted");
 						//call a method to start calls?
+						UDPsender(inetaddress[0]);
 					}
 					else if (state == Message.DECLINE)
 					{
@@ -147,6 +160,12 @@ public class ClientThread extends Thread
 					{
 						JOptionPane.showMessageDialog(null, "Server has gone down like me on your mom...");
 						System.exit(0);
+					}
+					else if (state == Message.ERROR)
+					{
+						socket.getInputStream().read(recbuf);
+						rec = (Message) toObject(recbuf);
+						JOptionPane.showMessageDialog(null, "It's bad to talk to yourself...");
 					}
 					else if (state == Message.REMOVED)
 					{
@@ -272,5 +291,72 @@ public class ClientThread extends Thread
         }
         return obj;
     }
+    
+    public static void UDPsender(String inet)
+    {
+    	try
+    	{
+    		String[] mal = inet.split("/");
+    		String host = mal[0];
+	    	callSocket = new DatagramSocket();
+			byte[] buffer = "Sender".getBytes();
+			
+			InetAddress[] testAddr = InetAddress.getAllByName(host);
 	
+			System.out.println(testAddr[0]);
+			callSocket.connect(testAddr[0], 3001);
+			
+			DatagramPacket packet = new DatagramPacket(buffer, buffer.length, testAddr[0], 3001);
+
+			callSocket.send(packet);
+			
+			packet = new DatagramPacket(buffer, buffer.length);
+			
+			callSocket.receive(packet);
+			byte[] message = packet.getData();
+			
+			for (byte mes: message)
+			{
+				System.out.print((char)mes);
+			}
+			System.out.println();
+			callSocket.close();
+    	}
+    	catch (Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+    }
+	
+    public static void UDPreceiver()
+    {
+    	try
+    	{
+	    	callSocket = new DatagramSocket(3001);
+			
+			byte[] buffer = new byte[100];
+			DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+			
+			callSocket.receive(packet);
+			
+			byte[] message = packet.getData();
+			
+			for (byte mes: message)
+			{
+				System.out.print((char)mes);
+			}
+			System.out.println();
+			
+			buffer = "Received".getBytes();
+			DatagramPacket rPacket = new DatagramPacket(buffer, buffer.length, packet.getAddress(), packet.getPort());
+			
+			
+			callSocket.send(rPacket);
+			callSocket.close();
+	    }
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+    }
 }

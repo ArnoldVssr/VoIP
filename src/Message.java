@@ -26,6 +26,7 @@ public class Message implements Serializable
     public static final int ACCEPT = 8;
     public static final int BYE = 9;
     public static final int SERVERDOWN = 10;
+    public static final int ERROR = 115;
 	
 	public Message()
     {

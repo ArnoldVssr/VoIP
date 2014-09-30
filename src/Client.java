@@ -20,7 +20,8 @@ public class Client
 	private static JFrame mainWindow = new JFrame();
 	private static JTextField messageField = new JTextField(20);
 	public static JTextArea chatArea = new JTextArea();
-	public static JList<String> onlineUsers = new JList<String>();
+	//public static JList<String> onlineUsers = new JList<String>();
+	public static JList onlineUsers = new JList();
 	
 	private static JButton connectButton = new JButton();
 	private static JButton disconnectButton = new JButton();
@@ -327,6 +328,7 @@ public class Client
 			ClientThread.Send(call);
 			System.out.println("call request sent");
 			callUserField.setText("");
+			callWindow.dispose();
 		}
 		else
 		{

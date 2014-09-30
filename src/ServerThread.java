@@ -54,22 +54,33 @@ public class ServerThread extends Thread
         			Message Temp = (Message) toObject(recbuf);
         			Socket rec = Server.Maptest.get(Temp.getRecipient());
         			sendbuf = toByteArray(Temp);
-        			if (rec != null)
+        			
+        			if (Temp.getRecipient().equalsIgnoreCase(Temp.getOrigin()))
+        			{
+	        			rec = Server.Maptest.get(Temp.getOrigin());
+	        			
+	        			rec.getOutputStream().write(Message.ERROR);
+	    				rec.getOutputStream().flush();
+	        			
+	        			rec.getOutputStream().write(sendbuf);
+	    				rec.getOutputStream().flush();
+        			}
+        			else if (rec != null)
         			{        				
         				rec.getOutputStream().write(Message.WHISPER);
         				rec.getOutputStream().flush();
         				
         				rec.getOutputStream().write(sendbuf);
         				rec.getOutputStream().flush();
+        				
+        				rec = Server.Maptest.get(Temp.getOrigin());
+            			
+            			rec.getOutputStream().write(Message.WHISPER);
+        				rec.getOutputStream().flush();
+            			
+            			rec.getOutputStream().write(sendbuf);
+        				rec.getOutputStream().flush();
         			}
-        			
-        			rec = Server.Maptest.get(Temp.getOrigin());
-        			
-        			rec.getOutputStream().write(Message.WHISPER);
-    				rec.getOutputStream().flush();
-        			
-        			rec.getOutputStream().write(sendbuf);
-    				rec.getOutputStream().flush();
         		}
         		else if (state == Message.LOBBY)
         		{
@@ -145,9 +156,16 @@ public class ServerThread extends Thread
         		else if (state == Message.ACCEPT)
         		{
         			socket.getInputStream().read(recbuf);
-        			Message temp = (Message) toObject(recbuf);
-        			Socket rec = Server.Maptest.get(temp.getOrigin());
-        			sendbuf = toByteArray(temp);
+        			String temp = (String) toObject(recbuf);
+        			
+        			System.out.println(temp);
+        			String[] data = temp.split(":");
+        			String name = data[2];
+        			
+        			String address = data[0] + ":" + data[1];
+        			
+        			Socket rec = Server.Maptest.get(name);
+        			sendbuf = toByteArray(address);
         			
         			rec.getOutputStream().write(Message.ACCEPT);
     				rec.getOutputStream().flush();
