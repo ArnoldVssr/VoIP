@@ -263,6 +263,23 @@ public class ServerThread extends Thread
 		Server._serverLog.append("\n");
 	}
 	
+	public static void ServerClosed()
+	{
+		try
+		{
+			for(Map.Entry<String, Socket> entry: Server.Maptest.entrySet())
+			{
+				entry.getValue().getOutputStream().write(Message.SERVERDOWN);
+				entry.getValue().getOutputStream().flush();
+			}
+			System.exit(0);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	public static byte[] toByteArray(Object obj) throws IOException
     {
         byte[] bytes = null;

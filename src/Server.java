@@ -1,3 +1,5 @@
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
@@ -36,7 +38,14 @@ public class Server
 	    _serverFrame.setSize(350, 200);
 	    _serverFrame.setResizable(false);
 	    _serverFrame.setTitle("ServerLogs");
-	    _serverFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	    _serverFrame.addWindowListener(
+				new WindowAdapter()
+				{
+					public void windowClosing(WindowEvent evt) 
+					{
+						ServerThread.ServerClosed();
+					}
+				});
 	    
 	    _serverLog.setColumns(20);
 	    _serverLog.setLineWrap(true);

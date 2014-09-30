@@ -26,6 +26,7 @@ public class Client
 	private static JButton disconnectButton = new JButton();
 	private static JButton sendButton = new JButton();
 	private static JButton callButton = new JButton();
+	private static JButton voiceNoteButton = new JButton();
 	private static JLabel messageLabel = new JLabel("Message: ");
 	private static JLabel chatLabel = new JLabel();
 	private static JLabel onlineLabel = new JLabel();
@@ -104,10 +105,23 @@ public class Client
 					}
 				});
 		
+		voiceNoteButton.setText("Record");
+		mainWindow.getContentPane().add(voiceNoteButton);
+		voiceNoteButton.setBounds(250, 40, 115, 25);
+		voiceNoteButton.addActionListener(
+				new java.awt.event.ActionListener()
+				{
+					public void actionPerformed(java.awt.event.ActionEvent event)
+					{
+						//SendButton();
+						//send voice note
+					}
+				});
+		
 		
 		disconnectButton.setText("Disconnect");
 		mainWindow.getContentPane().add(disconnectButton);
-		disconnectButton.setBounds(350, 40, 115, 25);
+		disconnectButton.setBounds(370, 40, 115, 25);
 		disconnectButton.addActionListener(
 				new java.awt.event.ActionListener()
 				{

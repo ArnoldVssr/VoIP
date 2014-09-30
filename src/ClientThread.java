@@ -143,6 +143,11 @@ public class ClientThread extends Thread
 						callSocket.close();
 						
 					}
+					else if (state == Message.SERVERDOWN)
+					{
+						JOptionPane.showMessageDialog(null, "Server has gone down like me on your mom...");
+						System.exit(0);
+					}
 					else if (state == Message.REMOVED)
 					{
 						socket.getInputStream().read(recbuf);
@@ -154,7 +159,8 @@ public class ClientThread extends Thread
 		}
 		catch (SocketException e) 
 		{
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Server is not responding");
+			System.exit(0);
 		} 
 		catch (IOException e)
 		{
