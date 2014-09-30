@@ -10,7 +10,7 @@ import javax.swing.*;
 /**
  * 
  * @author A Visser, 17224047
- * 		   T Butler, sit jou nommer orals in asb ken dit nogsteeds nie
+ * 		   T Butler, 17403812
  *
  */
 public class Server
@@ -59,6 +59,7 @@ public class Server
             {
 	            new ServerThread(serverSocket.accept()).start();
 	        }
+            serverSocket.close();
 	    }
 	    catch (IOException IOerror)
 	    {

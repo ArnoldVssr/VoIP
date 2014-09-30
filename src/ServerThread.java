@@ -5,7 +5,7 @@ import java.util.Map;
 /**
  * 
  * @author A Visser, 17224047
- * 		   T Butler, sit jou nommer orals in asb ken dit nogsteeds nie
+ * 		   T Butler, 17403812
  *
  */
 public class ServerThread extends Thread
@@ -133,7 +133,7 @@ public class ServerThread extends Thread
         		{
         			socket.getInputStream().read(recbuf);
         			Message temp = (Message) toObject(recbuf);
-        			Socket rec = Server.Maptest.get(temp.getRecipient());
+        			Socket rec = Server.Maptest.get(temp.getOrigin());
         			sendbuf = toByteArray(temp);
         			
         			rec.getOutputStream().write(Message.DECLINE);
@@ -146,7 +146,7 @@ public class ServerThread extends Thread
         		{
         			socket.getInputStream().read(recbuf);
         			Message temp = (Message) toObject(recbuf);
-        			Socket rec = Server.Maptest.get(temp.getRecipient());
+        			Socket rec = Server.Maptest.get(temp.getOrigin());
         			sendbuf = toByteArray(temp);
         			
         			rec.getOutputStream().write(Message.ACCEPT);

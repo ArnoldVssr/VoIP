@@ -1,6 +1,11 @@
 import java.io.Serializable;
 
-
+/**
+ * 
+ * @author A Visser, 17224047
+ * 		   T Butler, 17403812
+ *
+ */
 public class Message implements Serializable
 {
 	private String toUser = "";

@@ -6,7 +6,7 @@ import javax.swing.JOptionPane;
 /**
  * 
  * @author A Visser, 17224047
- * 		   T Butler, sit jou nommer orals in asb ken dit nogsteeds nie
+ * 		   T Butler, 17403812
  *
  */
 public class ClientThread extends Thread

@@ -4,15 +4,11 @@ import java.net.*;
 /**
  * 
  * @author A Visser, 17224047
- * 		   T Butler, sit jou nommer orals in asb ken dit nogsteeds nie
+ * 		   T Butler, 17403812
  *
  */
 public class User implements Serializable 
-{
-	/**
-	 * TODO : moet net kyk of ons dit nog so gaan gebruik.
-	 */
-	
+{	
     private String _name;
     private InetAddress _address;
     private int _port;

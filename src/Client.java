@@ -1,9 +1,12 @@
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
 import javax.swing.*;
 
 /**
  * 
  * @author A Visser, 17224047
- * 		   T Butler, sit jou nommer orals in asb ken dit nogsteeds nie
+ * 		   T Butler, 17403812
  *
  */
 public class Client
@@ -17,7 +20,7 @@ public class Client
 	private static JFrame mainWindow = new JFrame();
 	private static JTextField messageField = new JTextField(20);
 	public static JTextArea chatArea = new JTextArea();
-	public static JList onlineUsers = new JList();
+	public static JList<String> onlineUsers = new JList<String>();
 	
 	private static JButton connectButton = new JButton();
 	private static JButton disconnectButton = new JButton();
@@ -74,7 +77,15 @@ public class Client
 	
 	public static void BuildMainWindow()
 	{
-		mainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		mainWindow.addWindowListener(
+				new WindowAdapter()
+				{
+					public void windowClosing(WindowEvent evt) 
+					{
+						DCButton();
+					}
+				});
+		
 		mainWindow.setSize(500, 320);
 		mainWindow.setResizable(false);
 		
