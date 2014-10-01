@@ -114,20 +114,16 @@ public class ClientThread extends Thread
 						String prompt = "Accept call from " + rec.getOrigin() + "?";
 						int reply = JOptionPane.showConfirmDialog(null, prompt, "Call confirmation", JOptionPane.YES_NO_OPTION);
 				        if (reply == JOptionPane.YES_OPTION)
-				        {
-				        	//fok alles send dadelik
-				        	//send true
-				        	//confirmation = new Message(rec.getOrigin(), rec.getRecipient(), "%SURE SURE%");
-				        	
+				        {				        	
 				        	String addressName = socket.getRemoteSocketAddress().toString() + ":" + rec.getOrigin();
 				        	System.out.println(addressName);
+				        	
 				        	sendbuf = toByteArray(addressName);
 				        	socket.getOutputStream().write(Message.ACCEPT);
 				        	socket.getOutputStream().flush();
 				        	socket.getOutputStream().write(sendbuf);
 				        	socket.getOutputStream().flush();
 				        	
-				        	//call a method to start calls?
 				        	UDPreceiver();
 				        }
 				        else 

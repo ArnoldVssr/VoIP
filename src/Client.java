@@ -1,3 +1,4 @@
+import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -335,7 +336,8 @@ public class Client
 		optionWindow = new JFrame();
 		optionWindow.setTitle("Cr@p Sound Config");
 		optionWindow.setLayout(null);
-		optionWindow.setSize(500, 500);
+		optionWindow.setResizable(false);
+		optionWindow.setSize(400, 300);
 		
 		sampleList.setSelectedIndex(2);
 		sampleList.addActionListener(
@@ -347,20 +349,7 @@ public class Client
 				        float temp = Float.parseFloat((String)cb.getSelectedItem());
 				        sampleRate = temp;
 					}
-				});
-		
-		
-		/*private static JRadioButton bits8 = new JRadioButton();
-		private static JRadioButton bits16 = new JRadioButton();
-		
-		private static JRadioButton channel1 = new JRadioButton();
-		private static JRadioButton channel2 = new JRadioButton();
-		
-		private static JRadioButton sign1 = new JRadioButton();
-		private static JRadioButton sign0 = new JRadioButton();
-		
-		private static JRadioButton big = new JRadioButton();
-		private static JRadioButton small = new JRadioButton();*/
+				});		
 		
 		bits8 = new JRadioButton("8bits");
 		bits8.addActionListener(
@@ -368,16 +357,9 @@ public class Client
 				{
 					public void actionPerformed(java.awt.event.ActionEvent event)
 					{
-						if (bits8.isSelected())
-						{
-							bits8.setSelected(false);
-							bits16.setSelected(true);
-							sampleSizeInBits = 16;
-						}
-						else
+						if (event.getSource().equals(bits8))
 						{
 							bits8.setSelected(true);
-							bits16.setSelected(false);
 							sampleSizeInBits = 8;
 						}
 					}
@@ -390,16 +372,9 @@ public class Client
 				{
 					public void actionPerformed(java.awt.event.ActionEvent event)
 					{
-						if (bits16.isSelected())
-						{
-							bits16.setSelected(false);
-							bits8.setSelected(true);
-							sampleSizeInBits = 8;
-						}
-						else
+						if (event.getSource().equals(bits16))
 						{
 							bits16.setSelected(true);
-							bits8.setSelected(false);
 							sampleSizeInBits = 16;
 						}
 					}
@@ -413,17 +388,7 @@ public class Client
         //Put the radio buttons in a column in a panel.
         JPanel bitsPanel = new JPanel(new GridLayout(0, 1));
         bitsPanel.add(bits8);
-        bitsPanel.add(bits16);
-        
-        
-        /*private static JRadioButton channel1 = new JRadioButton();
-    	private static JRadioButton channel2 = new JRadioButton();
-    	
-    	private static JRadioButton sign1 = new JRadioButton();
-    	private static JRadioButton sign0 = new JRadioButton();
-    	
-    	private static JRadioButton big = new JRadioButton();
-    	private static JRadioButton small = new JRadioButton();*/
+        bitsPanel.add(bits16);    	
     	
     	channel1 = new JRadioButton("1 channel");
     	channel1.addActionListener(
@@ -431,16 +396,9 @@ public class Client
 				{
 					public void actionPerformed(java.awt.event.ActionEvent event)
 					{
-						if (channel1.isSelected())
-						{
-							channel1.setSelected(false);
-							channel2.setSelected(true);
-							channels = 2;
-						}
-						else
+						if (event.getSource().equals(channel1))
 						{
 							channel1.setSelected(true);
-							channel2.setSelected(false);
 							channels = 1;
 						}
 					}
@@ -453,16 +411,9 @@ public class Client
 				{
 					public void actionPerformed(java.awt.event.ActionEvent event)
 					{
-						if (channel2.isSelected())
-						{
-							channel2.setSelected(false);
-							channel1.setSelected(true);
-							channels = 1;
-						}
-						else
+						if (event.getSource().equals(channel2))
 						{
 							channel2.setSelected(true);
-							channel1.setSelected(false);
 							channels = 2;
 						}
 					}
@@ -475,14 +426,109 @@ public class Client
         
         //Put the radio buttons in a column in a panel.
         JPanel channelPanel = new JPanel(new GridLayout(0, 1));
-        channelPanel.add(bits8);
-        channelPanel.add(bits16);
+        channelPanel.add(channel1);
+        channelPanel.add(channel2);
+    	
+    	/*private static JRadioButton big = new JRadioButton();
+    	private static JRadioButton small = new JRadioButton();*/
 		
-		
-		
-		
+    	sign1 = new JRadioButton("signed");
+    	sign1.addActionListener(
+				new java.awt.event.ActionListener()
+				{
+					public void actionPerformed(java.awt.event.ActionEvent event)
+					{
+						if (event.getSource().equals(sign1))
+						{
+							sign1.setSelected(true);
+							signed = true;
+						}
+					}
+				});
+    	sign1.setSelected(true);
+
+    	sign0 = new JRadioButton("unsigned");
+    	sign0.addActionListener(
+				new java.awt.event.ActionListener()
+				{
+					public void actionPerformed(java.awt.event.ActionEvent event)
+					{
+						if (event.getSource().equals(sign0))
+						{
+							sign0.setSelected(true);
+							signed = false;
+						}
+					}
+				});
+    	sign0.setSelected(false);
+        
+        ButtonGroup group3 = new ButtonGroup();
+        group3.add(sign1);
+        group3.add(sign0);
+        
+        //Put the radio buttons in a column in a panel.
+        JPanel signPanel = new JPanel(new GridLayout(0, 1));
+        signPanel.add(sign1);
+        signPanel.add(sign0);       
+        
+        big = new JRadioButton("big endian");
+        big.addActionListener(
+				new java.awt.event.ActionListener()
+				{
+					public void actionPerformed(java.awt.event.ActionEvent event)
+					{
+						if (event.getSource().equals(big))
+						{
+							big.setSelected(true);
+							bigEndian = true;
+						}
+					}
+				});
+        big.setSelected(false);
+
+        small = new JRadioButton("little endian");
+        small.addActionListener(
+				new java.awt.event.ActionListener()
+				{
+					public void actionPerformed(java.awt.event.ActionEvent event)
+					{
+						if (event.getSource().equals(small))
+						{
+							small.setSelected(true);
+							bigEndian = false;
+						}
+					}
+				});
+        small.setSelected(true);
+        
+        ButtonGroup group4 = new ButtonGroup();
+        group4.add(big);
+        group4.add(small);
+        
+        JPanel endianPanel = new JPanel(new GridLayout(0, 1));
+        endianPanel.add(big);
+        endianPanel.add(small);
+	
+        JLabel dropLabel = new JLabel("Sample Rates:");
+        
+        optionWindow.getContentPane().add(dropLabel);
+        dropLabel.setBounds(50, 20, 260, 30);
+        
 		optionWindow.getContentPane().add(sampleList);
-		sampleList.setBounds(105, 65, 260, 20);
+		sampleList.setBounds(50, 50, 260, 30);
+		
+		optionWindow.getContentPane().add(bitsPanel);
+		bitsPanel.setBounds(50, 100, 100, 40);
+		
+		optionWindow.getContentPane().add(channelPanel);
+		channelPanel.setBounds(180, 100, 130, 40);
+		
+		optionWindow.getContentPane().add(signPanel);
+		signPanel.setBounds(50, 150, 130, 40);
+		
+		optionWindow.getContentPane().add(endianPanel);
+		endianPanel.setBounds(180, 150, 130, 40);
+		
 		optionWindow.setVisible(true);
 		
 	}
@@ -516,6 +562,42 @@ public class Client
 		
 		callWindow.setVisible(true);
 		
+	}
+	
+	public static void changeSampleRate()
+	{
+		
+	}
+	
+	public static void changeBits()
+	{
+		
+	}
+	
+	public static void changeChannels()
+	{
+		
+	}
+	
+	public static void changeSigned()
+	{
+		
+	}
+	
+	public static void changeEndian()
+	{
+		if (small.isSelected())
+		{
+			small.setSelected(false);
+			big.setSelected(true);
+			bigEndian = true;
+		}
+		else if (big.isSelected())
+		{
+			big.setSelected(false);
+			small.setSelected(true);
+			bigEndian = false;
+		}
 	}
 	
 	public static void RequestCall()
