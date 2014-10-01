@@ -20,7 +20,7 @@ public class ClientThread extends Thread
 	public static String hostname = "";
 	public static String portnum = "";
 	public static String musername = "";
-	public static String message = "";	
+	public static String message = "";
 	
 	/**
 	 * constuctor to start a ClientThread
@@ -298,6 +298,7 @@ public class ClientThread extends Thread
     	{
     		String[] mal = inet.split("/");
     		String host = mal[0];
+    		System.out.println(host);
 	    	callSocket = new DatagramSocket();
 			byte[] buffer = "Sender".getBytes();
 			

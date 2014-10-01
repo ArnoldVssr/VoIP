@@ -1,8 +1,7 @@
+import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-
 import javax.swing.*;
-
 /**
  * 
  * @author A Visser, 17224047
@@ -15,6 +14,10 @@ public class Client
 	private static String _userName = "";
 	private static String _hostName = "";
 	private static String _portNumber = "";
+	
+	//sound rates
+	private static String[] SampleRates = { "8000", "11025", "16000", "22050", "32000",
+										   "44100", "48000", "50000", "88200", "96000"};
 		
 	//main window
 	private static JFrame mainWindow = new JFrame();
@@ -22,11 +25,13 @@ public class Client
 	public static JTextArea chatArea = new JTextArea();
 	//public static JList<String> onlineUsers = new JList<String>();
 	public static JList onlineUsers = new JList();
+	private static JComboBox sampleList = new JComboBox(SampleRates);
 	
 	private static JButton connectButton = new JButton();
 	private static JButton disconnectButton = new JButton();
 	private static JButton sendButton = new JButton();
 	private static JButton callButton = new JButton();
+	private static JButton optionButton = new JButton();
 	private static JButton voiceNoteButton = new JButton();
 	private static JLabel messageLabel = new JLabel("Message: ");
 	private static JLabel chatLabel = new JLabel();
@@ -51,6 +56,31 @@ public class Client
 	private static JTextField callUserField = new JTextField(15);
 	private static JButton makeCallButton = new JButton();
 	private static JLabel callUserLabel = new JLabel();
+	
+	//options
+	private static JFrame optionWindow = new JFrame();
+	
+	private static JRadioButton bits8 = new JRadioButton();
+	private static JRadioButton bits16 = new JRadioButton();
+	
+	private static JRadioButton channel1 = new JRadioButton();
+	private static JRadioButton channel2 = new JRadioButton();
+	
+	private static JRadioButton sign1 = new JRadioButton();
+	private static JRadioButton sign0 = new JRadioButton();
+	
+	private static JRadioButton big = new JRadioButton();
+	private static JRadioButton small = new JRadioButton();
+	
+	
+	
+	
+	//sound
+	private static float sampleRate = 16000;
+	private static int sampleSizeInBits = 16; //8 or 16
+	private static int channels = 2; // 1 or 2
+	private static boolean signed = true; //true or false
+	private static boolean bigEndian = false; //true or false
 	
 	public static void main(String[] args)
 	{
@@ -144,6 +174,17 @@ public class Client
 					}
 				});
 		
+		optionButton.setText("Options");
+		mainWindow.getContentPane().add(optionButton);
+		optionButton.setBounds(370, 4, 115, 25);
+		optionButton.addActionListener(
+				new java.awt.event.ActionListener()
+				{
+					public void actionPerformed(java.awt.event.ActionEvent event)
+					{
+						OptionButton();
+					}
+				});
 		
 		messageLabel.setText("Message:");
 		mainWindow.getContentPane().add(messageLabel);
@@ -287,6 +328,163 @@ public class Client
 	{
 		Message bye = new Message(_userName, "", "%BYE%");
 		ClientThread.Send(bye);
+	}
+	
+	public static void OptionButton()
+	{
+		optionWindow = new JFrame();
+		optionWindow.setTitle("Cr@p Sound Config");
+		optionWindow.setLayout(null);
+		optionWindow.setSize(500, 500);
+		
+		sampleList.setSelectedIndex(2);
+		sampleList.addActionListener(
+				new java.awt.event.ActionListener()
+				{
+					public void actionPerformed(java.awt.event.ActionEvent event)
+					{
+						JComboBox cb = (JComboBox)event.getSource();
+				        float temp = Float.parseFloat((String)cb.getSelectedItem());
+				        sampleRate = temp;
+					}
+				});
+		
+		
+		/*private static JRadioButton bits8 = new JRadioButton();
+		private static JRadioButton bits16 = new JRadioButton();
+		
+		private static JRadioButton channel1 = new JRadioButton();
+		private static JRadioButton channel2 = new JRadioButton();
+		
+		private static JRadioButton sign1 = new JRadioButton();
+		private static JRadioButton sign0 = new JRadioButton();
+		
+		private static JRadioButton big = new JRadioButton();
+		private static JRadioButton small = new JRadioButton();*/
+		
+		bits8 = new JRadioButton("8bits");
+		bits8.addActionListener(
+				new java.awt.event.ActionListener()
+				{
+					public void actionPerformed(java.awt.event.ActionEvent event)
+					{
+						if (bits8.isSelected())
+						{
+							bits8.setSelected(false);
+							bits16.setSelected(true);
+							sampleSizeInBits = 16;
+						}
+						else
+						{
+							bits8.setSelected(true);
+							bits16.setSelected(false);
+							sampleSizeInBits = 8;
+						}
+					}
+				});
+		bits8.setSelected(false);
+
+		bits16 = new JRadioButton("16bits");
+		bits16.addActionListener(
+				new java.awt.event.ActionListener()
+				{
+					public void actionPerformed(java.awt.event.ActionEvent event)
+					{
+						if (bits16.isSelected())
+						{
+							bits16.setSelected(false);
+							bits8.setSelected(true);
+							sampleSizeInBits = 8;
+						}
+						else
+						{
+							bits16.setSelected(true);
+							bits8.setSelected(false);
+							sampleSizeInBits = 16;
+						}
+					}
+				});
+		bits16.setSelected(true);
+        
+        ButtonGroup group1 = new ButtonGroup();
+        group1.add(bits8);
+        group1.add(bits16);
+        
+        //Put the radio buttons in a column in a panel.
+        JPanel bitsPanel = new JPanel(new GridLayout(0, 1));
+        bitsPanel.add(bits8);
+        bitsPanel.add(bits16);
+        
+        
+        /*private static JRadioButton channel1 = new JRadioButton();
+    	private static JRadioButton channel2 = new JRadioButton();
+    	
+    	private static JRadioButton sign1 = new JRadioButton();
+    	private static JRadioButton sign0 = new JRadioButton();
+    	
+    	private static JRadioButton big = new JRadioButton();
+    	private static JRadioButton small = new JRadioButton();*/
+    	
+    	channel1 = new JRadioButton("1 channel");
+    	channel1.addActionListener(
+				new java.awt.event.ActionListener()
+				{
+					public void actionPerformed(java.awt.event.ActionEvent event)
+					{
+						if (channel1.isSelected())
+						{
+							channel1.setSelected(false);
+							channel2.setSelected(true);
+							channels = 2;
+						}
+						else
+						{
+							channel1.setSelected(true);
+							channel2.setSelected(false);
+							channels = 1;
+						}
+					}
+				});
+    	channel1.setSelected(false);
+
+    	channel2 = new JRadioButton("2 channels");
+    	channel2.addActionListener(
+				new java.awt.event.ActionListener()
+				{
+					public void actionPerformed(java.awt.event.ActionEvent event)
+					{
+						if (channel2.isSelected())
+						{
+							channel2.setSelected(false);
+							channel1.setSelected(true);
+							channels = 1;
+						}
+						else
+						{
+							channel2.setSelected(true);
+							channel1.setSelected(false);
+							channels = 2;
+						}
+					}
+				});
+    	channel2.setSelected(true);
+        
+        ButtonGroup group2 = new ButtonGroup();
+        group2.add(channel1);
+        group2.add(channel2);
+        
+        //Put the radio buttons in a column in a panel.
+        JPanel channelPanel = new JPanel(new GridLayout(0, 1));
+        channelPanel.add(bits8);
+        channelPanel.add(bits16);
+		
+		
+		
+		
+		optionWindow.getContentPane().add(sampleList);
+		sampleList.setBounds(105, 65, 260, 20);
+		optionWindow.setVisible(true);
+		
 	}
 	
 	public static void CallButton()
